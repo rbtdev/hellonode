@@ -1,4 +1,5 @@
 pipeline {
+    node {
     def app
 
     stages {
@@ -45,6 +46,8 @@ pipeline {
             notifyComplete()
         }
     }
+    }
+    
 }
 
 def notifyStarted() {
