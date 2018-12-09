@@ -1,6 +1,13 @@
 node {
+
+    def notifyStarted() {
+        // send to Slack
+        slackSend (color: '#FFFF00', message: "STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+        }
     def app
 
+    notifyStarted()
+    
     stage('Clone repository') {
         /* Let's make sure we have the repository cloned to our workspace */
 
