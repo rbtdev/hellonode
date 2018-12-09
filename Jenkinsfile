@@ -1,8 +1,9 @@
-
-node {
-    notifyStarted()
-    try {
+pipeline {
+    agent any
+    
+    stages {
         def app
+        notifyStarted()
         
         stage('Clone repository') {
             /* Let's make sure we have the repository cloned to our workspace */
@@ -36,12 +37,15 @@ node {
                 app.push("latest")
             }
         }
-        notifyComplete()
     }
-    catch (e) {
-        currentBuild.result = "FAILED"
-        notifyFailed(e)
-        throw e
+
+    post {
+        success {
+            notifyComplete()
+        }
+        failure {
+            notifyFailed()
+        }
     }
 }
 
@@ -56,3 +60,4 @@ def notifyComplete() {
 def notifyFailed(e) {
          slackSend (color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL}) ${e.message}")
         }
+
