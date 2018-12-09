@@ -1,7 +1,9 @@
 node {
     def app
 
-    notifyStarted()
+    stage ('Start') {
+        notifyStarted()
+    }
 
     stage('Clone repository') {
         /* Let's make sure we have the repository cloned to our workspace */
@@ -35,9 +37,19 @@ node {
             app.push("latest")
         }
     }
+
+    post {
+        success {
+            notifyComplete()
+        }
+    }
 }
 
 def notifyStarted() {
         // send to Slack
         slackSend (color: '#FFFF00', message: "STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+        }
+def notifyComplete() {
+        // send to Slack
+        slackSend (color: '#00FF00', message: "COMPLETED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
         }
