@@ -16,7 +16,7 @@ node {
             /* This builds the actual image; synonymous to
             * docker build on the command line */
 
-            app = docker.build("rbtdev/hellonode")
+            app = docker.build("rbtdevxx/hellonode")
         }
 
         stage('Test image') {
@@ -44,7 +44,7 @@ node {
     }
     catch (e) {
         currentBuild.result = "FAILED"
-        notifyFailed()
+        notifyFailed(e)
         throw e
     }
 }
@@ -57,6 +57,6 @@ def notifyComplete() {
         // send to Slack
         slackSend (color: '#00FF00', message: "COMPLETED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
         }
-def notifyFailed() {
-         slackSend (color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+def notifyFailed(e) {
+         slackSend (color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL}) ${e}")
         }
