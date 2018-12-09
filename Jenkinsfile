@@ -1,11 +1,9 @@
 
 node {
+    notifyStarted()
     try {
         def app
-        stage ('Start') {
-            notifyStarted()
-        }
-
+        
         stage('Clone repository') {
             /* Let's make sure we have the repository cloned to our workspace */
 
@@ -38,9 +36,7 @@ node {
                 app.push("latest")
             }
         }
-        stage('Complete') {
-            notifyComplete()
-        }
+        notifyComplete()
     }
     catch (e) {
         currentBuild.result = "FAILED"
