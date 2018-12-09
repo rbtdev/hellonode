@@ -1,9 +1,7 @@
-pipeline {
-    node {
-    def app
 
-    stages {
-
+node {
+    try {
+        def app
         stage ('Start') {
             notifyStarted()
         }
@@ -40,14 +38,15 @@ pipeline {
                 app.push("latest")
             }
         }
-    }
-    post {
-        success {
+        stage('Complete') {
             notifyComplete()
         }
     }
+    catch (e) {
+        currentBuild.result = "FAILED"
+        notifyFailed()
+        throw e
     }
-    
 }
 
 def notifyStarted() {
@@ -57,4 +56,7 @@ def notifyStarted() {
 def notifyComplete() {
         // send to Slack
         slackSend (color: '#00FF00', message: "COMPLETED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+        }
+def notifyFailed() {
+         slackSend (color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
         }
