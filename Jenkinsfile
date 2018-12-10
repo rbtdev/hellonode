@@ -1,58 +1,47 @@
-pipeline {
-    def app
+
+node {
     notifyStarted()
-    agent any
-    
-    stages {
+    try {
+        def app
+        
         stage('Clone repository') {
-            steps {
             /* Let's make sure we have the repository cloned to our workspace */
 
-              checkout scm
-            }
+            checkout scm
         }
 
         stage('Build image') {
-            steps {
-                /* This builds the actual image; synonymous to
-                * docker build on the command line */
+            /* This builds the actual image; synonymous to
+            * docker build on the command line */
 
-                app = docker.build("adasdasdasd/hellonode")
-            }
+            app = docker.build("adasdasdasd/hellonode")
         }
 
         stage('Test image') {
-            steps {
-                /* Ideally, we would run a test framework against our image.
-                * For this example, we're using a Volkswagen-type approach ;-) */
+            /* Ideally, we would run a test framework against our image.
+            * For this example, we're using a Volkswagen-type approach ;-) */
 
-                app.inside {
-                    sh 'echo "Tests passed"'
-                }
+            app.inside {
+                sh 'echo "Tests passed"'
             }
         }
 
         stage('Push image') {
-            steps {
-                /* Finally, we'll push the image with two tags:
-                * First, the incremental build number from Jenkins
-                * Second, the 'latest' tag.
-                * Pushing multiple tags is cheap, as all the layers are reused. */
-                docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
-                    app.push("${env.BUILD_NUMBER}")
-                    app.push("latest")
-                }
+            /* Finally, we'll push the image with two tags:
+            * First, the incremental build number from Jenkins
+            * Second, the 'latest' tag.
+            * Pushing multiple tags is cheap, as all the layers are reused. */
+            docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
+                app.push("${env.BUILD_NUMBER}")
+                app.push("latest")
             }
         }
+        notifyComplete()
     }
-
-    post {
-        success {
-            notifyComplete()
-        }
-        failure {
-            notifyFailed()
-        }
+    catch (e) {
+        currentBuild.result = "FAILED"
+        notifyFailed(e)
+        throw e
     }
 }
 
@@ -67,4 +56,3 @@ def notifyComplete() {
 def notifyFailed(e) {
          slackSend (color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL}) ${e.message}")
         }
-
